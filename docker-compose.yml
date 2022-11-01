@@ -1,0 +1,42 @@
+version: "3.9"
+volumes:
+  mongodb_volume:
+    driver: local
+services:
+  secret-providers:
+    build:
+      context: secret-providers
+      dockerfile: Dockerfile
+    image: secret-providers:latest
+    ports:
+      - "8083:8083"
+
+  secret-link-generator:
+    build:
+      context: secret-link-generator
+      dockerfile: Dockerfile
+    image: secret-link-generator:latest
+    ports:
+      - "8082:8082"
+  sql:
+    image: mysql:5.7
+    container_name: mysql
+    environment:
+      MYSQL_DATABASE: 'links'
+      MYSQL_USER: 'root'
+      MYSQL_PASSWORD: 'root'
+      MYSQL_ROOT_PASSWORD: 'root'
+    ports:
+      - "3306:3306"
+
+  mongodb:
+    image: mongodb:4.2.0
+    container_name: mongodb
+    ports:
+      - "27018:27017"
+    command: --wiredTigerCacheSizeGB 1
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    volumes:
+      - mongodb_volume:/data/db
